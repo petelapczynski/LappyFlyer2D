@@ -14,6 +14,8 @@ public class TapController : MonoBehaviour {
 	public float tapForce;
 	public float tiltSmooth;
 	public Vector3 startPos;
+	public SpriteRenderer[] boostImages;
+	public ParticleSystem smokeTrail;
 	public AudioSource tapSound;
 	public AudioSource scoreSound;
 	public AudioSource dieSound;
@@ -21,16 +23,21 @@ public class TapController : MonoBehaviour {
 	Rigidbody2D rigidBody;
 	Quaternion downRotation;
 	Quaternion forwardRotation;
+	float time;
 
 	GameManager game;
 	bool mouseDown;
 
 	void Start() {
+		game = GameManager.Instance;
 		rigidBody = GetComponent<Rigidbody2D>();
 		downRotation = Quaternion.Euler(0, 0 ,-30);
 		forwardRotation = Quaternion.Euler(0, 0, 30);
-		game = GameManager.Instance;
 		rigidBody.simulated = false;
+		time = Time.time;
+		for (int i = 0; i < boostImages.Length; i++) {
+			boostImages[i].enabled = false;
+		} 
 	}
 
 	void OnEnable() {
@@ -46,11 +53,14 @@ public class TapController : MonoBehaviour {
 	void OnGameStarted() {
 		rigidBody.velocity = Vector3.zero;
 		rigidBody.simulated = true;
+		smokeTrail.Play();
 	}
 
 	void OnGameOverConfirmed() {
 		transform.localPosition = startPos;
 		transform.rotation = Quaternion.identity;
+		rigidBody.velocity = Vector3.zero;
+		rigidBody.simulated = false;
 	}
 
 	void Update() {
@@ -58,61 +68,85 @@ public class TapController : MonoBehaviour {
 
 		if (Input.GetMouseButtonDown(0)){
 			mouseDown = true;
-		}
-
-		if (Input.GetMouseButton(0)) {
-			//rigidBody.velocity = Vector2.zero;
-			//transform.rotation = forwardRotation;
-			rigidBody.AddForce(Vector2.up * tapForce, ForceMode2D.Force);
-			transform.rotation = Quaternion.Lerp(transform.rotation, forwardRotation, tiltSmooth * Time.deltaTime);
-			//tapSound.Play();
-		}
-
-		if (Input.GetMouseButtonUp(0)){
-			mouseDown = false;
-		}
-
-		if (!mouseDown) {
-			transform.rotation = Quaternion.Lerp(transform.rotation, downRotation, tiltSmooth * Time.deltaTime);
+			var emission = smokeTrail.emission;
+			emission.rateOverTimeMultiplier = 100.0f;
 		}
 		
+		if (Input.GetMouseButtonUp(0)){
+			mouseDown = false;	
+			var emission = smokeTrail.emission;
+			emission.rateOverTimeMultiplier = 10.0f;		
+		}
+
+		if (mouseDown) {
+			rigidBody.AddForce(Vector2.up * tapForce, ForceMode2D.Force);
+			transform.rotation = Quaternion.Lerp(transform.rotation, forwardRotation, tiltSmooth * Time.deltaTime);	
+			//tapSound.Play();
+
+			// boost images
+			for (int i = 0; i < boostImages.Length; i++) {
+				//static on
+				//boostImages[i].enabled = true;
+
+				//toggle on
+				if (boostImages[i].enabled) {
+					boostImages[i].enabled = false;
+				} else {
+					boostImages[i].enabled = true;
+					if (boostImages[i].flipY) {
+				 		boostImages[i].flipY = false;
+					} else {
+						boostImages[i].flipY = true;
+					}
+				}
+			}
+
+		} else {
+			transform.rotation = Quaternion.Lerp(transform.rotation, downRotation, tiltSmooth * Time.deltaTime);
+
+			for (int i = 0; i < boostImages.Length; i++) {
+				boostImages[i].enabled = false;
+			}
+		}
 	}
 
 	void OnTriggerEnter2D(Collider2D col) {
 		if (col.gameObject.tag == "ScoreZone") {
-			OnPlayerScored(); // event sent to GameManager
-			// play a sound
-			scoreSound.Play();
+			if (Time.time > time + 1f ) {
+				time = Time.time;
+				OnPlayerScored(); // event sent to GameManager
+				// play a sound
+				scoreSound.Play();
+			}
 		}
 		if (col.gameObject.tag == "DeadZone") {
+			rigidBody.velocity = Vector3.zero;
 			rigidBody.simulated = false;
+			mouseDown = false;
+			smokeTrail.Stop();
 			OnPlayerDied(); // event sent to GameManager
 			// play a sounds
 			dieSound.Play();
 		}
-		if (col.gameObject.tag == "SpaceZone") {
-			//rigidBody.simulated = false;
-			OnPlayerGoToSpace(); // event sent to GameManager
-			// play a sounds
-			scoreSound.Play();
-
-			//OnGameOverConfirmed();
-			//OnGameStarted();
-			// transform.localPosition = startPos;
-			// rigidBody.velocity = Vector3.zero;
-			// rigidBody.AddForce(Vector2.up * tapForce, ForceMode2D.Force);
-		}
 		if (col.gameObject.tag == "GroundZone") {
-			//rigidBody.simulated = false;
-			OnPlayerGoToGround(); // event sent to GameManager
-			// play a sounds
-			scoreSound.Play();
-
-			//OnGameOverConfirmed();
-			//OnGameStarted();
-			// transform.localPosition = startPos;
-			// rigidBody.velocity = Vector3.zero;
-			// rigidBody.AddForce(-Vector2.up * tapForce, ForceMode2D.Force);
+			if (Time.time > time + 0.2f ) {
+				transform.localPosition = startPos;
+				smokeTrail.Clear();
+				time = Time.time;
+				OnPlayerGoToGround(); // event sent to GameManager
+				// play a sounds
+				scoreSound.Play();
+			}
+		}
+		if (col.gameObject.tag == "SpaceZone") {
+			if (Time.time > time + 0.2f ) {
+				transform.localPosition = startPos;
+				smokeTrail.Clear();
+				time = Time.time;
+				OnPlayerGoToSpace(); // event sent to GameManager
+				// play a sounds
+				scoreSound.Play();
+			}
 		}
 	}
 }

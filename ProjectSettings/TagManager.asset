@@ -8,6 +8,9 @@ TagManager:
   - ScoreZone
   - SpaceZone
   - GroundZone
+  - CeilingZone
+  - MoonZone
+  - SolarZone
   layers:
   - Default
   - TransparentFX

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour {
 
@@ -14,6 +15,8 @@ public class GameManager : MonoBehaviour {
     public GameObject countdownPage;
 		public GameObject sceneGround;
 		public GameObject sceneSpace;
+		public GameObject sceneMoon;
+		public GameObject sceneSolar;
 
     public Text scoreText;
 
@@ -24,6 +27,7 @@ public class GameManager : MonoBehaviour {
         Countdown
     }
 
+	string GameScene; 
     int score = 0;
     bool gameOver = true;
 
@@ -31,89 +35,150 @@ public class GameManager : MonoBehaviour {
  
     void Awake() {
 			if (Instance != null) {
-				Destroy(gameObject);
+			 	Destroy(gameObject);
 			}
-			else {
+			else { 
 				Instance = this;
-				DontDestroyOnLoad(gameObject);
+			// 	DontDestroyOnLoad(gameObject);
 			}
     }
 
+	void Start() {
+		SetGameScene("GROUND");
+		SetPageState(PageState.Start);
+		PlayerSelected();
+	}
+
     void OnEnable() {
-      TapController.OnPlayerDied += OnPlayerDied;
-			TapController.OnPlayerScored += OnPlayerScored;
-			TapController.OnPlayerGoToSpace += OnPlayerGoToSpace;
-			TapController.OnPlayerGoToGround += OnPlayerGoToGround;
-			CountdownText.OnCountdownFinished += OnCountdownFinished;
+      	TapController.OnPlayerDied += OnPlayerDied;
+		TapController.OnPlayerScored += OnPlayerScored;
+		TapController.OnPlayerGoToSpace += OnPlayerGoToSpace;
+		TapController.OnPlayerGoToGround += OnPlayerGoToGround;
+		CountdownText.OnCountdownFinished += OnCountdownFinished;
     }
 
     void OnDisable() {
-      TapController.OnPlayerDied -= OnPlayerDied;
-			TapController.OnPlayerScored -= OnPlayerScored;
-			TapController.OnPlayerGoToSpace -= OnPlayerGoToSpace;
-			TapController.OnPlayerGoToGround -= OnPlayerGoToGround;
-			CountdownText.OnCountdownFinished -= OnCountdownFinished;
+    	TapController.OnPlayerDied -= OnPlayerDied;
+		TapController.OnPlayerScored -= OnPlayerScored;
+		TapController.OnPlayerGoToSpace -= OnPlayerGoToSpace;
+		TapController.OnPlayerGoToGround -= OnPlayerGoToGround;
+		CountdownText.OnCountdownFinished -= OnCountdownFinished;
     }
 
   	void OnCountdownFinished() {
-			SetPageState(PageState.None);
-			OnGameStarted();
-			score = 0;
-			scoreText.gameObject.SetActive(true);
-			gameOver = false;
-		}
+		SetPageState(PageState.None);
+		OnGameStarted();
+		score = 0;
+		scoreText.gameObject.SetActive(true);
+		gameOver = false;
+	}
 
-		void OnPlayerScored() {
-			score++;
-			scoreText.text = score.ToString();
-		}
+	void OnPlayerScored() {
+		score++;
+		scoreText.text = score.ToString();
+	}
 
-		void OnPlayerDied() {
-			gameOver = true;
-			int savedScore = PlayerPrefs.GetInt("HighScore");
-			if (score > savedScore) {
-				PlayerPrefs.SetInt("HighScore", score);
-			}
-			SetPageState(PageState.GameOver);
+	void OnPlayerDied() {
+		gameOver = true;
+		int savedScore = PlayerPrefs.GetInt("HighScore");
+		if (score > savedScore) {
+			PlayerPrefs.SetInt("HighScore", score);
 		}
+		SetPageState(PageState.GameOver);
+	}
 
-		void OnPlayerGoToSpace() {
-			sceneSpace.SetActive(true);
-			sceneGround.SetActive(false);
-			OnGameOverConfirmed();
-			OnGameStarted();
+	void OnPlayerGoToSpace() {
+		OnGameOverConfirmed();
+		switch (GameScene) {
+			case "GROUND":
+				SetGameScene("SPACE");
+				break;
+			case "SPACE":
+				SetGameScene("MOON");		
+				break;
+			case "MOON":
+				SetGameScene("SOLAR");			
+				break;	
+			case "SOLAR":
+				break;					
 		}
+		OnGameStarted();
+	}
 
-		void OnPlayerGoToGround() {
-			sceneGround.SetActive(true);
-			sceneSpace.SetActive(false);
-			OnGameOverConfirmed();
-			OnGameStarted();
+	void OnPlayerGoToGround() {
+		OnGameOverConfirmed();
+		switch (GameScene) {
+			case "GROUND":
+				break;
+			case "SPACE":
+				SetGameScene("GROUND");		
+				break;
+			case "MOON":
+				SetGameScene("SPACE");			
+				break;	
+			case "SOLAR":
+				SetGameScene("MOON");	
+				break;					
 		}
+		OnGameStarted();
+	}
+
+	void SetGameScene(string zone) {
+		//Debug.Log("GameManager: SetGameScene: " + zone);
+		sceneGround.SetActive(false);
+		sceneSpace.SetActive(false);
+		sceneMoon.SetActive(false);
+		sceneSolar.SetActive(false);
+
+		switch (zone) {
+			case "GROUND":
+				sceneGround.SetActive(true);
+				break;
+			case "SPACE":
+				sceneSpace.SetActive(true);			
+				break;
+			case "MOON":
+				sceneMoon.SetActive(true);				
+				break;	
+			case "SOLAR":
+				sceneSolar.SetActive(true);
+				break;					
+		}
+		GameScene = zone;
+	}
 
     void SetPageState(PageState state) {
-			switch (state) {
-				case PageState.None:
-					startPage.SetActive(false);
-					gameOverPage.SetActive(false);
-					countdownPage.SetActive(false);
-					break;
-				case PageState.Start:
-					startPage.SetActive(true);
-					gameOverPage.SetActive(false);
-					countdownPage.SetActive(false);
-					break;
-				case PageState.Countdown:
-					startPage.SetActive(false);
-					gameOverPage.SetActive(false);
-					countdownPage.SetActive(true);
-					break;
-				case PageState.GameOver:
-					startPage.SetActive(false);
-					gameOverPage.SetActive(true);
-					countdownPage.SetActive(false);
-					break;
+		startPage.SetActive(false);
+		gameOverPage.SetActive(false);
+		countdownPage.SetActive(false);
+		
+		switch (state) {
+			case PageState.None:
+				break;
+			case PageState.Start:
+				startPage.SetActive(true);
+				break;
+			case PageState.Countdown:
+				countdownPage.SetActive(true);
+				break;
+			case PageState.GameOver:
+				gameOverPage.SetActive(true);
+				break;
+		}
+	}
+
+	void PlayerSelected() {
+		string playerSelected = PlayerPrefs.GetString("PlayerSelected","player_aaron");
+		GameObject[] gobs;
+		gobs = Resources.FindObjectsOfTypeAll<GameObject>();
+
+		foreach (GameObject go in gobs) {
+			if (go.name == playerSelected) {
+				go.SetActive(true);
+				//Debug.Log("GameManager: PlayerSelected: " + go.name);
+				//break;
 			}
+		} 
 	}
 
 	public void ConfirmGameOver() {
@@ -125,6 +190,10 @@ public class GameManager : MonoBehaviour {
 
 	public void StartGame() {
 		SetPageState(PageState.Countdown);
+	}
+
+	public void SelectPlayerScene() {
+		SceneManager.LoadScene("characterSelection");
 	}
 
 }
