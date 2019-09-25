@@ -26,7 +26,7 @@ public class Parallaxer : MonoBehaviour {
 
 	public GameObject[] Prefabs;
 	public int poolSize;
-	public float shiftSpeed;
+	public float defaultShiftSpeed;
 	public float spawnRate;
 
 	public YSpawnRange ySpawnRange;
@@ -40,6 +40,7 @@ public class Parallaxer : MonoBehaviour {
 	PoolObject[] poolObjects;
 	GameManager game;
 	int currentObject;
+	float shiftSpeed;
 
 	void Awake() {
 		Configure();
@@ -51,10 +52,14 @@ public class Parallaxer : MonoBehaviour {
 
 	void OnEnable() {
 		GameManager.OnGameOverConfirmed += OnGameOverConfirmed;
+		GameManager.OnSpeedUp += OnSpeedUp;
+        GameManager.OnSpeedDown += OnSpeedDown;
 	}
 
 	void OnDisable() {
 		GameManager.OnGameOverConfirmed -= OnGameOverConfirmed;
+		GameManager.OnSpeedUp -= OnSpeedUp;
+        GameManager.OnSpeedDown -= OnSpeedDown;
 	}
 
 	void OnGameOverConfirmed() {
@@ -69,6 +74,21 @@ public class Parallaxer : MonoBehaviour {
 		//Configure();
 	}
 
+	void OnSpeedUp() {
+        //increase speed, adjust spawnRate
+		shiftSpeed += 0.25f;
+		spawnRate = 19.0f / shiftSpeed; 
+    }
+    
+    void OnSpeedDown() {
+		//decrease speed, adjust spawnRate
+        shiftSpeed -= 0.25f;
+        if (shiftSpeed < defaultShiftSpeed) {
+            shiftSpeed = defaultShiftSpeed;
+        }
+		spawnRate = 19.0f / shiftSpeed; 
+    }
+
 	void Update() {
 		if (game.GameOver) return;
 
@@ -82,6 +102,7 @@ public class Parallaxer : MonoBehaviour {
 
 	void Configure() {
 		//spawning pool objects
+		shiftSpeed = defaultShiftSpeed;
 		currentObject = 0;
 		targetAspect = targetAspectRatio.x / targetAspectRatio.y;
 		poolObjects = new PoolObject[poolSize];

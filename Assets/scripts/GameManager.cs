@@ -7,16 +7,21 @@ public class GameManager : MonoBehaviour {
     public delegate void GameDelegate();
     public static event GameDelegate OnGameStarted;
     public static event GameDelegate OnGameOverConfirmed;
+	public static event GameDelegate OnSpeedUp;
+	public static event GameDelegate OnSpeedDown;
 
     public static GameManager Instance;
 
     public GameObject startPage;
     public GameObject gameOverPage;
     public GameObject countdownPage;
-		public GameObject sceneGround;
-		public GameObject sceneSpace;
-		public GameObject sceneMoon;
-		public GameObject sceneSolar;
+	public GameObject infoPage;
+	public GameObject sceneGround;
+	public GameObject sceneSpace;
+	public GameObject sceneMoon;
+	public GameObject sceneSolar;
+	public GameObject speedDown;
+	public GameObject speedUp;
 
     public Text scoreText;
 
@@ -24,7 +29,8 @@ public class GameManager : MonoBehaviour {
         None,
         Start,
         GameOver,
-        Countdown
+        Countdown,
+		Info
     }
 
 	string GameScene; 
@@ -55,6 +61,7 @@ public class GameManager : MonoBehaviour {
 		TapController.OnPlayerGoToSpace += OnPlayerGoToSpace;
 		TapController.OnPlayerGoToGround += OnPlayerGoToGround;
 		CountdownText.OnCountdownFinished += OnCountdownFinished;
+
     }
 
     void OnDisable() {
@@ -70,6 +77,8 @@ public class GameManager : MonoBehaviour {
 		OnGameStarted();
 		score = 0;
 		scoreText.gameObject.SetActive(true);
+		speedDown.SetActive(true);
+		speedUp.SetActive(true);
 		gameOver = false;
 	}
 
@@ -151,6 +160,7 @@ public class GameManager : MonoBehaviour {
 		startPage.SetActive(false);
 		gameOverPage.SetActive(false);
 		countdownPage.SetActive(false);
+		infoPage.SetActive(false);
 		
 		switch (state) {
 			case PageState.None:
@@ -164,11 +174,14 @@ public class GameManager : MonoBehaviour {
 			case PageState.GameOver:
 				gameOverPage.SetActive(true);
 				break;
+			case PageState.Info:
+				infoPage.SetActive(true);
+				break;
 		}
 	}
 
 	void PlayerSelected() {
-		string playerSelected = PlayerPrefs.GetString("PlayerSelected","player_aaron");
+		string playerSelected = PlayerPrefs.GetString("PlayerSelected","player_mini");
 		GameObject[] gobs;
 		gobs = Resources.FindObjectsOfTypeAll<GameObject>();
 
@@ -176,14 +189,26 @@ public class GameManager : MonoBehaviour {
 			if (go.name == playerSelected) {
 				go.SetActive(true);
 				//Debug.Log("GameManager: PlayerSelected: " + go.name);
-				//break;
+				float playerHeight = go.GetComponent<PolygonCollider2D>().bounds.size.y;
+				float playerWidth = go.GetComponent<PolygonCollider2D>().bounds.size.x;
+
+				if (playerHeight > 0) {
+					PlayerPrefs.SetFloat("PlayerHeight", playerHeight);
+				}
+				if (playerWidth > 0) {
+					PlayerPrefs.SetFloat("PlayerWidth", playerWidth);
+				}
+				
 			}
-		} 
+		}
+
 	}
 
 	public void ConfirmGameOver() {
 		scoreText.gameObject.SetActive(false);
-		SetPageState(PageState.Start);
+		speedDown.SetActive(false);
+		speedUp.SetActive(false);
+		SetPageState(PageState.Countdown);
 		scoreText.text = "0";
 		OnGameOverConfirmed();
 	}
@@ -194,6 +219,26 @@ public class GameManager : MonoBehaviour {
 
 	public void SelectPlayerScene() {
 		SceneManager.LoadScene("characterSelection");
+	}
+
+	public void StartInfo() {
+		SetPageState(PageState.Info);
+	}
+	
+	public void ReturnToStart() {
+		SetPageState(PageState.Start);
+	}
+
+	public void ExitGame() {
+		Application.Quit();
+	}
+
+	public void ClickSpeedUp() {
+		OnSpeedUp();
+	}
+
+	public void ClickSpeedDown() {
+		OnSpeedDown();
 	}
 
 }

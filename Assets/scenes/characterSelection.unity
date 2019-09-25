@@ -486,60 +486,71 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characterList:
-  - splash: {fileID: 21300000, guid: 70c99c08491e16c46947268760082408, type: 3}
-    name: Aaron Mobile
-    prefabName: player_aaron
+  - splash: {fileID: 21300000, guid: a046bfc365eb98d4daf85efdc6965b88, type: 3}
+    name: Mini Flyer
+    prefabName: player_mini
     prefabHeight: 2.5
+    prefabWidth: 4
     color: {r: 0.11525454, g: 0.6603774, b: 0.17652716, a: 0.49019608}
-  - splash: {fileID: 21300000, guid: ed216a81e26ab6b43b6b3d3655d4dfe2, type: 3}
-    name: Aaron Flyer
-    prefabName: player_aaronflyer
+  - splash: {fileID: 21300000, guid: dee8945943aea1d4ab994a4d1056aeac, type: 3}
+    name: Max Flyer
+    prefabName: player_max
     prefabHeight: 3
+    prefabWidth: 4
     color: {r: 0.7735849, g: 0.3383123, b: 0.16420436, a: 0.49019608}
-  - splash: {fileID: 21300000, guid: 897541edccccc474682e769c8f238492, type: 3}
-    name: Nathan
-    prefabName: player_nathan
+  - splash: {fileID: 21300000, guid: d62e8d3e879f3cc418937ac83cc6404b, type: 3}
+    name: TooFast Flyer
+    prefabName: player_toofast
     prefabHeight: 2.5
+    prefabWidth: 4
     color: {r: 0, g: 0.54025364, b: 1, a: 0.49019608}
-  - splash: {fileID: 21300000, guid: e19df480bed238e45b026cc5b76abcca, type: 3}
-    name: Spaceman
+  - splash: {fileID: 21300000, guid: 86993a76ec4871b469f9945583bfe0cc, type: 3}
+    name: Spaceman Flyer
     prefabName: player_spaceman
     prefabHeight: 2.5
+    prefabWidth: 4
     color: {r: 0.7362523, g: 1, b: 0, a: 0.49019608}
-  - splash: {fileID: 21300000, guid: 70f2d2430b092214fb8164912ad80038, type: 3}
-    name: Batman
-    prefabName: player_jet
+  - splash: {fileID: 21300000, guid: c0f83953fc8866049ae7508b6fcaabdd, type: 3}
+    name: Black Flyer
+    prefabName: player_black
     prefabHeight: 2.5
+    prefabWidth: 4
     color: {r: 0, g: 0, b: 0, a: 0.49019608}
   - splash: {fileID: 21300000, guid: a8a01476404305145969edd9ec8c7d50, type: 3}
-    name: Roboshark
+    name: Roboshark Flyer
     prefabName: player_roboshark
     prefabHeight: 2.5
+    prefabWidth: 4
     color: {r: 0.29162064, g: 0.24959949, b: 0.6698113, a: 0.49019608}
   - splash: {fileID: 21300000, guid: 7ebc5b65514713349aca89a38da75f4b, type: 3}
-    name: Camaro
-    prefabName: player_camaro
+    name: Racecar Flyer
+    prefabName: player_racecar
     prefabHeight: 2.5
+    prefabWidth: 4
     color: {r: 0.011764707, g: 0.14509805, b: 0.40784317, a: 1}
   - splash: {fileID: 21300000, guid: fdeec753841186948a6825a42304f60b, type: 3}
-    name: Crusher
-    prefabName: player_crusher
+    name: Monster Flyer
+    prefabName: player_monster
     prefabHeight: 3
+    prefabWidth: 4
     color: {r: 0.9176471, g: 0.43137258, b: 0.1137255, a: 0.49019608}
   - splash: {fileID: 21300000, guid: 873cb4dbc8a1c634483d666545a94620, type: 3}
-    name: Pirateship
-    prefabName: player_pirateship
+    name: Pirate Flyer
+    prefabName: player_pirate
     prefabHeight: 4.5
+    prefabWidth: 8
     color: {r: 0.14117648, g: 0.17254902, b: 0.23137257, a: 0.49019608}
   - splash: {fileID: 21300000, guid: 0b978cff96369ce4a9700318585abfa0, type: 3}
-    name: Rocketman
+    name: Rocketman Flyer
     prefabName: player_rocketman
     prefabHeight: 2.5
+    prefabWidth: 4
     color: {r: 0.94117653, g: 0.32941177, b: 0.10196079, a: 0.49019608}
   - splash: {fileID: 21300000, guid: dbc6295ee27606b4f9f4481120d30ae6, type: 3}
-    name: Spaceship
-    prefabName: player_spaceship
+    name: Space Flyer
+    prefabName: player_space
     prefabHeight: 3
+    prefabWidth: 4
     color: {r: 0.9686275, g: 0.8941177, b: 0.8470589, a: 0.49019608}
   characterName: {fileID: 1914289610}
   characterSplash: {fileID: 1193318865}

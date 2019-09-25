@@ -36,12 +36,11 @@ public class PipeParallaxer : MonoBehaviour
     public GameObject[] Prefabs;
     public GameObject ScoreZone;
     public int poolSize;
-    public float shiftSpeed;
-    public float spawnRate;
+    public float defaultShiftSpeed;
 
     public YSpawnRange ySpawnRange;
     public Vector3 defaultSpawnPos;
-    public bool spawnImmediate; // particle prewarm
+    public bool spawnImmediate;
     public Vector3 immediateSpawnPos;
     public Vector2 targetAspectRatio;
 
@@ -51,25 +50,34 @@ public class PipeParallaxer : MonoBehaviour
     GameManager game;
     int currentObject;
     float pipeGap;
+    float spawnRate;
+    float playerHeight;
+    float PlayerWidth;
+    float shiftSpeed;
 
     void Awake()
     {
-        Configure();
+        //Configure();
     }
 
     void Start()
     {
         game = GameManager.Instance;
+        Configure();
     }
 
     void OnEnable()
     {
         GameManager.OnGameOverConfirmed += OnGameOverConfirmed;
+        GameManager.OnSpeedUp += OnSpeedUp;
+        GameManager.OnSpeedDown += OnSpeedDown;
     }
 
     void OnDisable()
     {
         GameManager.OnGameOverConfirmed -= OnGameOverConfirmed;
+        GameManager.OnSpeedUp += OnSpeedUp;
+        GameManager.OnSpeedDown += OnSpeedDown;
     }
 
     void OnGameOverConfirmed()
@@ -84,9 +92,20 @@ public class PipeParallaxer : MonoBehaviour
 
         if (spawnImmediate)
         {
-            SpawnImmediate();
+            spawnTimer = spawnRate;
         }
 
+    }
+
+    void OnSpeedUp() {
+        shiftSpeed += 0.25f;
+    }
+    
+    void OnSpeedDown() {
+        shiftSpeed -= 0.25f;
+        if (shiftSpeed < defaultShiftSpeed) {
+            shiftSpeed = defaultShiftSpeed;
+        }
     }
 
     void Update()
@@ -99,13 +118,16 @@ public class PipeParallaxer : MonoBehaviour
         {
             Spawn();
             spawnTimer = 0;
+            spawnRate = (Random.Range(PlayerPrefs.GetFloat("PlayerWidth",4.0f) * 2f, PlayerPrefs.GetFloat("PlayerWidth",4.0f) * 3f) ) / shiftSpeed;
         }
     }
-
+    
     void Configure()
     {
         //spawning pool objects
-        pipeGap = PlayerPrefs.GetFloat("PlayerHeight",3.0f);
+        shiftSpeed = defaultShiftSpeed;
+        playerHeight = PlayerPrefs.GetFloat("PlayerHeight",4.0f);
+        spawnRate = PlayerPrefs.GetFloat("PlayerWidth",4.0f);
         currentObject = 0;
         targetAspect = targetAspectRatio.x / targetAspectRatio.y;
         poolObjects = new List<PoolObject>();
@@ -121,10 +143,11 @@ public class PipeParallaxer : MonoBehaviour
                 pos.x = 50;
                 if (i == 0) {
                     yPos = Random.Range(ySpawnRange.min, ySpawnRange.max);
+                    pipeGap = Random.Range(playerHeight * 1.5f, playerHeight * 2f);
+                    //Debug.Log("PipeParallaxer: pipeGap: " + pipeGap);
                     pos.y = yPos;
                 } else {
-                    yPos += (pipeGap);
-                    pos.y = yPos;
+                    pos.y = yPos + pipeGap;
                 }
                 
 		        t.position = pos;
@@ -134,7 +157,7 @@ public class PipeParallaxer : MonoBehaviour
             }
         } while (iPoolSize <= poolSize);	
 		if (spawnImmediate) {
-			SpawnImmediate();
+			spawnTimer = spawnRate;
 		}
     }
 
@@ -153,26 +176,7 @@ public class PipeParallaxer : MonoBehaviour
                 bDone = true;
             }
         } while (bDone == false);
-        
-    }
 
-    void SpawnImmediate()
-    {
-        //moving pool objects into Immediate Spawn place
-        bool bDone = false;
-        do {
-            Transform t = GetPoolObject();
-            if (t == null) return;
-            Vector3 pos = t.position;
-            pos.x = (immediateSpawnPos.x * Camera.main.aspect) / targetAspect;
-            t.position = pos;
-            NextPoolObject();
-            if (GetPoolObjectIndex() == 0) {
-                bDone = true;
-            }
-        } while (bDone == false);
-
-        Spawn();
     }
 
     void Shift()
@@ -180,8 +184,10 @@ public class PipeParallaxer : MonoBehaviour
         //loop through pool objects moving them //discarding them as they go off screen
         for (int i = 0; i < poolObjects.Count; i++)
         {
-            poolObjects[i].transform.localPosition += -Vector3.right * shiftSpeed * Time.deltaTime;
-            CheckDisposeObject(poolObjects[i]);
+            if (poolObjects[i].inUse) {
+                poolObjects[i].transform.localPosition += -Vector3.right * shiftSpeed * Time.deltaTime;
+                CheckDisposeObject(poolObjects[i]);
+            }
         }
     }
 

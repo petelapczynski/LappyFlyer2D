@@ -26,14 +26,14 @@ public class CharacterSelection : MonoBehaviour {
 
     private void Start() {
         bSelected = false;
-        string player = PlayerPrefs.GetString("PlayerSelected", "player_aaron");
+        string player = PlayerPrefs.GetString("PlayerSelected", "player_mini");
         float playerHeight = PlayerPrefs.GetFloat("PlayerHeight", 3.0f);
+        float playerWidth = PlayerPrefs.GetFloat("PlayerWidth", 3.0f);
         for (int i=0; i < characterList.Count; i++) {
             if (characterList[i].prefabName == player) {
                 selectedCharacterIndex = i;
             }
         }
-        
         UpdateCharacterSelectionUI();
     }
 
@@ -68,9 +68,10 @@ public class CharacterSelection : MonoBehaviour {
         //arrowClickSFX.Play();
         string player = characterList[selectedCharacterIndex].prefabName;
         float playerHeight = characterList[selectedCharacterIndex].prefabHeight;
+        float playerWidth = characterList[selectedCharacterIndex].prefabWidth;
         PlayerPrefs.SetString("PlayerSelected", player);
         PlayerPrefs.SetFloat("PlayerHeight", playerHeight);
-        
+        PlayerPrefs.SetFloat("PlayerWidth", playerWidth);
         bSelected = true;
     }
 
@@ -84,10 +85,10 @@ public class CharacterSelection : MonoBehaviour {
     [System.Serializable]
     public class CharacterSelectObject {
         public Sprite splash;
-        //public GameObject character;
         public string name;
         public string prefabName;
         public float prefabHeight;
+        public float prefabWidth;
         public Color color;
     }
 
